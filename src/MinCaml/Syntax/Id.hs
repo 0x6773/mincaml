@@ -1,23 +1,24 @@
-module Id where
+module MinCaml.Syntax.Id where
 
 import           MinCaml.Syntax.Type
 
-import           Control.Monad.IO.Class (MonadIO)
-import           Data.IORef
+import           Text.Printf
 
-data Id = Id String
+data Id
+  = Id String
+  deriving (Show, Eq)
 
 class HasCounter m where
   getC :: m Int
   modC :: (Int -> Int) -> m ()
 
-incC :: MonadIO m => m Int
+incC :: (Monad m, HasCounter m) => m Int
 incC = modC (+1) >> getC
 
-decC :: MonadIO m => m Int
+decC :: (Monad m, HasCounter m) => m Int
 decC = modC (subtract 1) >> getC
 
-genId :: (MonadIO m, HasCounter m) => String -> m Id
+genId :: (Monad m, HasCounter m) => String -> m Id
 genId s = Id . printf "%s.%d" s <$> incC
 
 typeId :: Type -> String
@@ -31,5 +32,5 @@ typeId c = case c of
   Array _ -> "a"
   Var _   -> error "assert False"
 
-genTmp :: (MonadIO m, HasCounter m) => Type -> m Id
+genTmp :: (Monad m, HasCounter m) => Type -> m Id
 genTmp typ = Id . printf "T%s%d" (typeId typ) <$> incC

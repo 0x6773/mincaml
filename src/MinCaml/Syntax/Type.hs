@@ -1,6 +1,6 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 
-module Type where
+module MinCaml.Syntax.Type where
 
 import           Prelude    (IO, String, error, (<$>))
 
