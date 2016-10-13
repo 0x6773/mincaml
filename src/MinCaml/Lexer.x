@@ -1,8 +1,8 @@
 {
 module MinCaml.Lexer where
 
-import qualified MinCaml.Syntax.Term as Term
-import qualified MinCaml.Syntax.Type as Type
+import MinCaml.Syntax.Id (genTmp)
+import MinCaml.Syntax.Type (Type (Unit))
 }
 
 %wrapper "monadUserState"
@@ -46,7 +46,7 @@ tokens :-
 <0>              "in" { TIn }
 <0>              "rec" { TRec }
 <0>              "," { TComma }
-<0>              "_" { TIdent (Id.genTmp Type.Unit) }
+<0>              "_" { TIdent (genTmp Unit) }
 <0>              "Array.create" { TArrayCreate }
 <0>              "." { TDot }
 <0>              "<-" { TLessMinus }
@@ -61,7 +61,7 @@ data Token
   | TFloat Float
   | TNot
   | TMinus
-  | TPlus 
+  | TPlus
   | TMinusDot
   | TPlusDot
   | TAstDot
@@ -98,10 +98,15 @@ data AlexUserState
   , depth :: Int
   }
 
+alexInitUserState :: AlexUserState
+alexInitUserState = AlexUserState 0 0
+
 modUst :: (AlexUserState -> AlexUserState) -> AlexState -> AlexState
 modUst f st@AlexState { alex_ust = ust } = st { alex_ust = f ust }
 
 modDepth = modUst (\(AlexUserState c d) -> AlexUserState c (f d))
+incDepth = modDepth (+1)
+decDepth = modDepth (subtract 1)
 
 instance HasCounter AlexState where
   getC st = counter . alex_ust
